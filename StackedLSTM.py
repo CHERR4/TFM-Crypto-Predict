@@ -15,6 +15,7 @@ class StackedLSTM:
     self.model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
     self.n_steps = n_steps
     self.n_features = n_features
+    self.n_outputs = n_outputs
     self.scaler = MinMaxScaler(feature_range=(0, 1))
     print(self.model.summary())
 
@@ -58,3 +59,8 @@ class StackedLSTM:
     predictions = predictions.reshape(predictions.shape[0], predictions.shape[1])
     return predictions
 
+  def save_model(self, path='stackedLSTM.h5'):
+    self.model.save(path)
+
+  def load_model(self, path='stackedLSTM.h5'):
+    self.model = load_model(path)

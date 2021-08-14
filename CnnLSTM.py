@@ -3,18 +3,26 @@ import pandas as pd
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
+from keras.layers import TimeDistributed
+from keras.layers import Flatten
+from keras.layers.convolutional import Conv1D
+from keras.layers.convolutional import MaxPooling1D
 from sklearn.preprocessing import MinMaxScaler
 
-class ConvLSTM:
+class CnnLSTM:
 
-  def __init__(self, n_neurons=50, n_steps=1, n_features=1, n_outputs=3, n_filters=64, kernel_size=(1,2)):
+  def __init__(self, n_neurons=50, n_steps=1, n_features=1, n_outputs=3, n_filters=64, kernel_size=1, n_seq=1):
     self.model = Sequential()
-    model.add(ConvLSTM2D(filters=n_filters, kernel_size=kernel_size, activation='relu', input_shape=(n_seq, 1, n_steps, n_features)))
-    model.add(Flatten())    self.model.add(Dense(n_outputs))
+    self.model.add(TimeDistributed(Conv1D(filters=n_filters, kernel_size=kernel_size, activation='relu'), input_shape=(None, n_steps, n_features)))
+    self.model.add(TimeDistributed(MaxPooling1D(pool_size=2)))
+    self.model.add(TimeDistributed(Flatten()))
+    self.model.add(LSTM(50, activation='relu'))
+    self.model.add(Dense(n_outputs))
     self.model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
     self.n_steps = n_steps
     self.n_features = n_features
     self.n_outputs = n_outputs
+    self.n_seq = n_seq
     self.scaler = MinMaxScaler(feature_range=(0, 1))
     print(self.model.summary())
 
@@ -44,7 +52,7 @@ class ConvLSTM:
     train_x, train_y = self.__split_sequence(train_scaled)
     # reshape input to be [samples, time steps, features]
     train_x = np.reshape(train_x, (train_x.shape[0], self.n_steps, self.n_features))
-
+    train_x = train_x.reshape((train_x.shape[0], self.n_seq, self.n_steps, self.n_features))
     train_y = np.reshape(train_y, (train_y.shape[0], train_y.shape[1]))
 
     history = self.model.fit(train_x, train_y, epochs=epochs, validation_split=validation_split, batch_size=batch_size)
@@ -54,8 +62,15 @@ class ConvLSTM:
     test_scaled = self.scaler.transform(test_df)
     test_x, _ = self.__split_sequence(test_scaled)
     test_x = np.reshape(test_x, (test_x.shape[0], self.n_steps, self.n_features))
+    test_x = test_x.reshape((test_x.shape[0], self.n_seq, self.n_steps, self.n_features))
     predictions = self.model.predict(test_x)
     predictions = self.scaler.inverse_transform(predictions)
     predictions = predictions.reshape(predictions.shape[0], predictions.shape[1])
     return predictions
+
+  def save_model(self, path='cnnLSTM.h5'):
+    self.model.save(path)
+
+  def load_model(self, path='cnnLSTM.h5'):
+    self.model = load_model(path)
 

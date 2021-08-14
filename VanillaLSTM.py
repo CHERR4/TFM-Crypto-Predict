@@ -59,9 +59,9 @@ class VanillaLSTM:
     predictions = predictions.reshape(predictions.shape[0], predictions.shape[1])
     return predictions
 
-  def save_model(self, path='vanillaModel.h5'):
+  def save_model(self, path='vanillaLSTM.h5'):
     self.model.save(path)
 
-  def load_model(self, path='vanillaModel.h5'):
+  def load_model(self, path='vanillaLSTM.h5'):
     self.model = load_model(path)
 
