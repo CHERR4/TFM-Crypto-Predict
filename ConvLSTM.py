@@ -9,7 +9,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 class ConvLSTM:
 
-  def __init__(self, n_neurons=50, n_steps=1, n_features=1, n_outputs=3, n_filters=64, kernel_size=(1,2), n_seq=1):
+  def __init__(self, n_neurons=50, n_steps=1, n_features=1, n_outputs=3, n_filters=64, kernel_size=(1,2), n_seq=1, loss='mean_squared_error', optimizer='adam'):
     self.model = Sequential()
     self.model.add(ConvLSTM2D(filters=n_filters, kernel_size=(1,2), activation='relu', input_shape=(n_seq, 1, n_steps, n_features)))
     self.model.add(Flatten())

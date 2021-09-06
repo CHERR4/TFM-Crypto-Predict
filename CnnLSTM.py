@@ -11,14 +11,14 @@ from sklearn.preprocessing import MinMaxScaler
 
 class CnnLSTM:
 
-  def __init__(self, n_neurons=50, n_steps=1, n_features=1, n_outputs=3, n_filters=64, kernel_size=1, n_seq=1):
+  def __init__(self, n_neurons=50, n_steps=1, n_features=1, n_outputs=3, n_filters=64, kernel_size=1, n_seq=1, loss='mean_squared_error', optimizer='adam'):
     self.model = Sequential()
     self.model.add(TimeDistributed(Conv1D(filters=n_filters, kernel_size=kernel_size, activation='relu'), input_shape=(None, n_steps, n_features)))
     self.model.add(TimeDistributed(MaxPooling1D(pool_size=2)))
     self.model.add(TimeDistributed(Flatten()))
-    self.model.add(LSTM(50, activation='relu'))
+    self.model.add(LSTM(n_neurons, activation='relu'))
     self.model.add(Dense(n_outputs))
-    self.model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
+    self.model.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
     self.n_steps = n_steps
     self.n_features = n_features
     self.n_outputs = n_outputs

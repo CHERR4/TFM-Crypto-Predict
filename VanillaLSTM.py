@@ -7,11 +7,11 @@ from sklearn.preprocessing import MinMaxScaler
 
 class VanillaLSTM:
 
-  def __init__(self, n_neurons=50, n_steps=1, n_features=1, n_outputs=3):
+  def __init__(self, n_neurons=50, n_steps=1, n_features=1, n_outputs=3, loss='mean_squared_error', optimizer='adam'):
     self.model = Sequential()
     self.model.add(LSTM(n_neurons, activation='relu', input_shape=(n_steps, n_features)))
     self.model.add(Dense(n_outputs))
-    self.model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
+    self.model.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
     self.n_steps = n_steps
     self.n_features = n_features
     self.n_outputs = n_outputs
