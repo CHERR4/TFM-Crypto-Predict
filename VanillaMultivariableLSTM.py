@@ -19,7 +19,6 @@ class VanillaLSTM:
     print(self.model.summary())
 
 
-  # convert series to supervised learning
   def series_to_supervised(self, data, dropnan=True):
     n_vars = 1 if type(data) is list else data.shape[1]
     df = pd.DataFrame(data)

@@ -49,6 +49,18 @@ class VanillaLSTM:
 
     history = self.model.fit(train_x, train_y, epochs=epochs, validation_split=validation_split, batch_size=batch_size)
     return history.history
+
+  def retrain(self, train_df, epochs, batch_size=16, validation_split=0.1):
+    # train_df.reset_index(inplace=True)
+    train_scaled = self.scaler.transform(train_df)
+    train_x, train_y = self.__split_sequence(train_scaled)
+    # reshape input to be [samples, time steps, features]
+    train_x = np.reshape(train_x, (train_x.shape[0], self.n_steps, self.n_features))
+
+    train_y = np.reshape(train_y, (train_y.shape[0], train_y.shape[1]))
+
+    history = self.model.fit(train_x, train_y, epochs=epochs, validation_split=validation_split, batch_size=batch_size)
+    return history.history
   
   def predict(self, test_df):
     test_scaled = self.scaler.transform(test_df)

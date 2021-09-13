@@ -11,7 +11,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 class CnnLSTM:
 
-  def __init__(self, n_neurons=50, n_steps=1, n_features=1, n_outputs=3, n_filters=64, kernel_size=1, n_seq=1, loss='mean_squared_error', optimizer='adam'):
+  def __init__(self, n_neurons=50, n_steps=1, n_features=1, n_outputs=3, n_filters=64, kernel_size=2, n_seq=1, loss='mean_squared_error', optimizer='adam'):
     self.model = Sequential()
     self.model.add(TimeDistributed(Conv1D(filters=n_filters, kernel_size=kernel_size, activation='relu'), input_shape=(None, n_steps, n_features)))
     self.model.add(TimeDistributed(MaxPooling1D(pool_size=2)))
@@ -49,6 +49,18 @@ class CnnLSTM:
   def train(self, train_df, epochs, batch_size=16, validation_split=0.1):
     # train_df.reset_index(inplace=True)
     train_scaled = self.scaler.fit_transform(train_df)
+    train_x, train_y = self.__split_sequence(train_scaled)
+    # reshape input to be [samples, time steps, features]
+    train_x = np.reshape(train_x, (train_x.shape[0], self.n_steps, self.n_features))
+    train_x = train_x.reshape((train_x.shape[0], self.n_seq, self.n_steps, self.n_features))
+    train_y = np.reshape(train_y, (train_y.shape[0], train_y.shape[1]))
+
+    history = self.model.fit(train_x, train_y, epochs=epochs, validation_split=validation_split, batch_size=batch_size)
+    return history.history
+
+  def retrain(self, train_df, epochs, batch_size=16, validation_split=0.1):
+    # train_df.reset_index(inplace=True)
+    train_scaled = self.scaler.transform(train_df)
     train_x, train_y = self.__split_sequence(train_scaled)
     # reshape input to be [samples, time steps, features]
     train_x = np.reshape(train_x, (train_x.shape[0], self.n_steps, self.n_features))
