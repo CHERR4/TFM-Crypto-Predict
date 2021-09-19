@@ -59,29 +59,37 @@ class BidirectionalLSTM:
     train_X = train_X.reshape((train_X.shape[0], self.n_steps, self.n_features))
     history = self.model.fit(train_X, train_y, epochs=epochs, validation_split=validation_split, batch_size=batch_size)
     return history.history
+
+  def retrain(self, train_df, epochs, batch_size=16, validation_split=0.1):
+    # train_df.reset_index(inplace=True)
+    values = train_df.values
+    values = values.astype('float32')
+
+    scaled = self.scaler.transform(values)
+
+    train_formated_df = self.series_to_supervised(scaled)
+    train = train_formated_df.values
+    # reshape input to be [samples, time steps, features]
+    n_obs = self.n_steps * self.n_features
+    train_X, train_y = train[:, :n_obs], train[:, -self.n_features]
+    train_X = train_X.reshape((train_X.shape[0], self.n_steps, self.n_features))
+    history = self.model.fit(train_X, train_y, epochs=epochs, validation_split=validation_split, batch_size=batch_size)
+    return history.history
   
   def predict(self, test_df):
     values = test_df.values
     values = values.astype('float32')
     scaled = self.scaler.transform(values)
-    print('scaled\n', scaled)
     test_formated_df = self.series_to_supervised(scaled)
-    print("test_formated_df", test_formated_df.head())
     test = test_formated_df.values
     n_obs = self.n_steps * self.n_features
     test_X, test_y = test[:, :n_obs], test[:, -self.n_features]
     test_x = np.reshape(test_X, (test_X.shape[0], self.n_steps, self.n_features))
     predictions = self.model.predict(test_x)
-    print("predictions", predictions)
-    print(predictions.shape)
     last_two_columns = np.array([x[-2:] for x in values])
     last_rows = last_two_columns[-self.n_outputs:]
-    print("last rows", last_rows)
-    print(last_rows.shape)
     y_concat = np.concatenate((predictions.T, last_rows), axis=1)
-    print("concat", y_concat)
     predictions = self.scaler.inverse_transform(y_concat)
-    print("predictions", predictions)
     predictions = np.array([x[:1] for x in predictions])
     # predictions = predictions.reshape(predictions.shape[0], predictions.shape[1])
     return predictions
