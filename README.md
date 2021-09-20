@@ -15,22 +15,22 @@ Este repositorio tiene la siguiente estructura:
   1. **Preparación de los datos**
   - `TFM_Data_Preparation.ipynb`
   - salida:
-    - `stocks.csv`
-    - `btcStocks.csv`
-    - `ethStocks.csv`
-    - `adaStocks.csv`
-    - `btcActualStocks.csv`
-    - `ethActualStocks.csv`
-    - `adaActualStocks.csv`
+    - `multivariable/stocks.csv`
+    - `univariable/btcStocks.csv`
+    - `univariable/ethStocks.csv`
+    - `univariable/adaStocks.csv`
+    - `actualUnivariable/btcActualStocks.csv`
+    - `actualUnivariable/ethActualStocks.csv`
+    - `actualUnivariable/adaActualStocks.csv`
     
     
   2. **Búsqueda hiperparámetros**<br />
-    2.1. **Univariable**
+    1. **Univariable**
     - `TFM_Monovariable_Btc_Forecast.ipynb`<br />
     - Ficheros de entrada para su ejecución:
         - univariable/btcStocks.csv
         - models/univariable/*.py<br />
-    2.2. **Multivariable**
+    2. **Multivariable**
     - `TFM_Multivariable_Forecast.ipynb`<br />
         - multivariable/stocks.csv
         - models/multivariable/*.py
