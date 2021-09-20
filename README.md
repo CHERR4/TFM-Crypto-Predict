@@ -29,7 +29,7 @@ Este repositorio tiene la siguiente estructura:
     - `TFM_Monovariable_Btc_Forecast.ipynb`<br />
     - Ficheros de entrada para su ejecución:
         - univariable/btcStocks.csv
-        - models/univariable/*.py
+        - models/univariable/*.py<br />
     2. **Multivariable**
     - `TFM_Multivariable_Forecast.ipynb`<br />
         - multivariable/stocks.csv
