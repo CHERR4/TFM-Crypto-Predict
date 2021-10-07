@@ -1,26 +1,31 @@
+import json
 import numpy as np
 import pandas as pd
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import LSTM
-from keras.layers import Flatten
-from keras.layers import ConvLSTM2D
+from keras.models import Sequential, load_model
+from keras.layers import Dense, LSTM, Flatten, ConvLSTM2D
 from sklearn.preprocessing import MinMaxScaler
+from pickle import dump, load
+
 
 class ConvLSTM:
 
-  def __init__(self, n_neurons=50, n_steps=1, n_features=1, n_outputs=3, n_filters=64, kernel_size=(1,2), n_seq=1, loss='mean_squared_error', optimizer='adam'):
-    self.model = Sequential()
-    self.model.add(ConvLSTM2D(filters=n_filters, kernel_size=(1,2), activation='relu', input_shape=(n_seq, 1, n_steps, n_features)))
-    self.model.add(Flatten())
-    self.model.add(Dense(n_outputs))
-    self.model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
-    self.n_steps = n_steps
-    self.n_features = n_features
-    self.n_outputs = n_outputs
-    self.scaler = MinMaxScaler(feature_range=(0, 1))
-    self.n_seq = n_seq
-    print(self.model.summary())
+  def __init__(self, n_neurons=None, n_steps=1, n_features=1, n_outputs=3, n_filters=64, kernel_size=(1,2), n_seq=1, loss='mean_squared_error', optimizer='adam'):
+    if n_neurons is not None:
+      self.model = Sequential()
+      self.model.add(ConvLSTM2D(filters=n_filters, kernel_size=(1,2), activation='relu', input_shape=(n_seq, 1, n_steps, n_features)))
+      self.model.add(Flatten())
+      self.model.add(Dense(n_outputs))
+      self.model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
+      self.n_neurons = n_neurons
+      self.n_steps = n_steps
+      self.n_features = n_features
+      self.n_outputs = n_outputs
+      self.scaler = MinMaxScaler(feature_range=(0, 1))
+      self.n_seq = n_seq
+      print(self.model.summary())
+    else:
+      print('Empty model remember to import an existing model')
+
 
 
   # convert series to supervised learning
@@ -64,7 +69,7 @@ class ConvLSTM:
     history = self.model.fit(train_x, train_y, epochs=epochs, validation_split=validation_split, batch_size=batch_size)
     return history.history
 
-  def train(self, train_df, epochs, batch_size=16, validation_split=0.1):
+  def retrain(self, train_df, epochs, batch_size=16, validation_split=0.1):
     # train_df.reset_index(inplace=True)
     values = train_df.values
     values = values.astype('float32')
@@ -101,9 +106,30 @@ class ConvLSTM:
     # predictions = predictions.reshape(predictions.shape[0], predictions.shape[1])
     return predictions
 
-  def save_model(self, path='convLSTM.h5'):
-    self.model.save(path)
+  def export_model(self, model_path='convLSTM.h5', params_path='paramsConvLSTM.json', scaler_path='scalerConvLSTM.pkl'):
+    self.model.save(model_path)
+    params = {
+      'model': 'ConvLSTM',
+      'n_neurons': self.n_neurons,
+      'n_steps': self.n_steps,
+      'n_features': self.n_features,
+      'n_outputs': self.n_outputs,
+      'loss': self.loss,
+      'optimizer': self.optimizer
+    }
+    with open(params_path, 'w') as params_file:
+      json.dump(params, params_file,  indent=4)
+    dump(self.scaler, open(scaler_path, 'wb'))
 
-  def load_model(self, path='convLSTM.h5'):
-    self.model = load_model(path)
+  def import_model(self, model_path='convLSTM.h5', params_path='paramsConvLSTM.json', scaler_path='scalerConvLSTM.pkl'):
+    self.model = load_model(model_path)
+    with open(params_path) as params_file:
+      params = json.load(params_file)
+    self.n_neurons = params['n_neurons']
+    self.n_steps = params['n_steps']
+    self.n_features = params['n_features']
+    self.n_outputs = params['n_outputs']
+    self.loss = params['loss']
+    self.optimizer = params['optimizer']
+    self.scaler = load(open(scaler_path, 'rb'))
 

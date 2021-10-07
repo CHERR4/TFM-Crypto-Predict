@@ -1,0 +1,9 @@
+{
+    "model": "BidirectionalLSTM",
+    "n_neurons": 50,
+    "n_steps": 7,
+    "n_features": 3,
+    "n_outputs": 3,
+    "loss": "mean_squared_error",
+    "optimizer": "adam"
+}

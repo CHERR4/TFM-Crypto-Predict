@@ -1,0 +1,21 @@
+entrypoint: "gunicorn -b :3000 api:api --timeout 500"
+
+runtime: python
+
+env: flex
+
+service: price-delta
+
+runtime_config:
+
+  python_version: 3.7
+
+instance_class: B1
+
+manual_scaling:
+
+  instances: 1
+
+liveness_check:
+
+  path: "/liveness_check"

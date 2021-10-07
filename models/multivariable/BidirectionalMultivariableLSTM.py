@@ -1,24 +1,30 @@
+import json
 import numpy as np
 import pandas as pd
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import LSTM
-from keras.layers import Bidirectional
+from keras.models import Sequential, load_model
+from keras.layers import Dense, LSTM, Bidirectional
 from sklearn.preprocessing import MinMaxScaler
+from pickle import dump, load
+
 
 class BidirectionalLSTM:
 
-  def __init__(self, n_neurons=50, n_steps=1, n_features=1, n_outputs=3, loss='mean_squared_error', optimizer='adam'):
-    self.model = Sequential()
-    self.model.add(Bidirectional(LSTM(n_neurons, activation='relu'), input_shape=(n_steps, n_features)))
-    self.model.add(Dense(n_outputs))
-    self.model.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
-    self.n_steps = n_steps
-    self.n_features = n_features
-    self.n_outputs = n_outputs
-    self.scaler = MinMaxScaler(feature_range=(0, 1))
-    print(self.model.summary())
-
+  def __init__(self, n_neurons=None, n_steps=1, n_features=1, n_outputs=3, loss='mean_squared_error', optimizer='adam'):
+    if n_neurons is not None:
+      self.model = Sequential()
+      self.model.add(Bidirectional(LSTM(n_neurons, activation='relu'), input_shape=(n_steps, n_features)))
+      self.model.add(Dense(n_outputs))
+      self.model.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
+      self.n_neurons = n_neurons
+      self.n_steps = n_steps
+      self.n_features = n_features
+      self.n_outputs = n_outputs
+      self.loss = loss
+      self.optimizer = optimizer
+      self.scaler = MinMaxScaler(feature_range=(0, 1))
+      print(self.model.summary())
+    else:
+      print('Empty model remember to import an existing model')
 
   # convert series to supervised learning
   def series_to_supervised(self, data, dropnan=True):
@@ -94,9 +100,29 @@ class BidirectionalLSTM:
     # predictions = predictions.reshape(predictions.shape[0], predictions.shape[1])
     return predictions
 
-  def save_model(self, path='vanillaLSTM.h5'):
-    self.model.save(path)
+  def export_model(self, model_path='bidirectionalLSTM.h5', params_path='paramsBidirectionalLSTM.json', scaler_path='scalerBidirectionalLSTM.pkl'):
+    self.model.save(model_path)
+    params = {
+      'model': 'BidirectionalLSTM',
+      'n_neurons': self.n_neurons,
+      'n_steps': self.n_steps,
+      'n_features': self.n_features,
+      'n_outputs': self.n_outputs,
+      'loss': self.loss,
+      'optimizer': self.optimizer
+    }
+    with open(params_path, 'w') as params_file:
+      json.dump(params, params_file,  indent=4)
+    dump(self.scaler, open(scaler_path, 'wb'))
 
-  def load_model(self, path='vanillaLSTM.h5'):
-    self.model = load_model(path)
-
+  def import_model(self, model_path='bidirectionalLSTM.h5', params_path='paramsBidirectionalLSTM.json', scaler_path='scalerBidirectionalLSTM.pkl'):
+    self.model = load_model(model_path)
+    with open(params_path) as params_file:
+      params = json.load(params_file)
+    self.n_neurons = params['n_neurons']
+    self.n_steps = params['n_steps']
+    self.n_features = params['n_features']
+    self.n_outputs = params['n_outputs']
+    self.loss = params['loss']
+    self.optimizer = params['optimizer']
+    self.scaler = load(open(scaler_path, 'rb'))

@@ -1,0 +1,7 @@
+{
+    "n_steps": 5,
+    "n_features": 3,
+    "n_outputs": 3,
+    "loss": "mean_squared_error",
+    "optimizer": "adam"
+}
