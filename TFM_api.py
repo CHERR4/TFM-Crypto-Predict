@@ -7,11 +7,19 @@ from math import expm1
 from flask import Flask, jsonify, request
 from tensorflow import keras
 from models.multivariable.VanillaMultivariableLSTM import VanillaLSTM
+from models.multivariable.StackedMultivariableLSTM import StackedLSTM
 from models.multivariable.BidirectionalMultivariableLSTM import BidirectionalLSTM
+from models.multivariable.CnnMultivariableLSTM import CnnLSTM
+from models.multivariable.ConvMultivariableLSTM import ConvLSTM
 
 app = Flask(__name__)
 host = '0.0.0.0'
 port = 3000
+
+def load_params(params_path):
+    with open(params_path) as params_file:
+      params = json.load(params_file)
+    return params
 
 model_3_name = 'trainedModels/predict3/bidirectionalLSTM.h5'
 model_3_params = 'trainedModels/predict3/paramsBidirectionalLSTM.json'
@@ -21,18 +29,22 @@ model_2_name = 'trainedModels/predict2/bidirectionalLSTM.h5'
 model_2_params = 'trainedModels/predict2/paramsBidirectionalLSTM.json'
 model_2_scaler = 'trainedModels/predict2/scalerBidirectionalLSTM.pkl'
 
-model_1_name = 'trainedModels/predict1/bidirectionalLSTM.h5'
-model_1_params = 'trainedModels/predict1/paramsBidirectionalLSTM.json'
-model_1_scaler = 'trainedModels/predict1/scalerBidirectionalLSTM.pkl'
+model_1_name = 'trainedModels/predict1/cnnLSTM.h5'
+model_1_params = 'trainedModels/predict1/paramsCnnLSTM.json'
+model_1_scaler = 'trainedModels/predict1/scalerCnnLSTM.pkl'
 
 model_predict_3 = BidirectionalLSTM()
 model_predict_3.import_model(model_3_name, model_3_params, model_3_scaler)
+predict_3_params = load_params(model_3_params)
 
 model_predict_2 = BidirectionalLSTM()
 model_predict_2.import_model(model_2_name, model_2_params, model_2_scaler)
+predict_2_params = load_params(model_2_params)
 
-model_predict_1 = BidirectionalLSTM()
+model_predict_1 = CnnLSTM()
 model_predict_1.import_model(model_1_name, model_1_params, model_1_scaler)
+predict_1_params = load_params(model_1_params)
+
 
 def build_prediction_dataframe(training_ts, predictions_ts):
   last_training_predictions = [training_ts.tail(1), predictions_ts]
@@ -48,9 +60,10 @@ def index():
 
 @app.route('/predict-3', methods=['POST'])
 def predict_3():
-    n_features = 3
-    n_steps = 7
-    n_predict = 3
+    n_features = predict_3_params['n_features']
+    n_steps = predict_3_params['n_steps']
+    n_predict = predict_3_params['n_outputs']
+
     steps_param = request.args.get('steps')
     steps_to_predict = [float(x) for x in steps_param.replace('[', '').replace(']','').split(',')]
     steps_with_zeros = steps_to_predict[:]
@@ -74,9 +87,10 @@ def predict_3():
 
 @app.route('/retrain-3', methods=['POST'])
 def retrain_3():
-    n_features = 3
-    n_steps = 7
-    n_predict = 3
+    n_features = predict_3_params['n_features']
+    n_steps = predict_3_params['n_steps']
+    n_predict = predict_3_params['n_outputs']
+    
     stocks_param = request.args.get('stocks')
     stocks_to_train = [float(x) for x in stocks_param.replace('[', '').replace(']','').split(',')]
     stocks_formated = np.reshape(stocks_to_train, (int(len(stocks_to_train)/n_features), n_features))
@@ -92,9 +106,10 @@ def info_3():
 
 @app.route('/predict-2', methods=['POST'])
 def predict_2():
-    n_features = 3
-    n_steps = 3
-    n_predict = 2
+    n_features = predict_2_params['n_features']
+    n_steps = predict_2_params['n_steps']
+    n_predict = predict_2_params['n_outputs']
+
     steps_param = request.args.get('steps')
     steps_to_predict = [float(x) for x in steps_param.replace('[', '').replace(']','').split(',')]
     steps_with_zeros = steps_to_predict[:]
@@ -118,9 +133,10 @@ def predict_2():
 
 @app.route('/retrain-2', methods=['POST'])
 def retrain_2():
-    n_features = 3
-    n_steps = 3
-    n_predict = 2
+    n_features = predict_2_params['n_features']
+    n_steps = predict_2_params['n_steps']
+    n_predict = predict_2_params['n_outputs']
+
     stocks_param = request.args.get('stocks')
     stocks_to_train = [float(x) for x in stocks_param.replace('[', '').replace(']','').split(',')]
     stocks_formated = np.reshape(stocks_to_train, (int(len(stocks_to_train)/n_features), n_features))
@@ -136,9 +152,10 @@ def info_2():
 
 @app.route('/predict-1', methods=['POST'])
 def predict_1():
-    n_features = 3
-    n_steps = 5
-    n_predict = 1
+    n_features = predict_1_params['n_features']
+    n_steps = predict_1_params['n_steps']
+    n_predict = predict_1_params['n_outputs']
+
     steps_param = request.args.get('steps')
     steps_to_predict = [float(x) for x in steps_param.replace('[', '').replace(']','').split(',')]
     steps_with_zeros = steps_to_predict[:]
@@ -162,9 +179,10 @@ def predict_1():
 
 @app.route('/retrain-1', methods=['POST'])
 def retrain_1():
-    n_features = 3
-    n_steps = 5
-    n_predict = 1
+    n_features = predict_1_params['n_features']
+    n_steps = predict_1_params['n_steps']
+    n_predict = predict_1_params['n_outputs']
+    
     stocks_param = request.args.get('stocks')
     stocks_to_train = [float(x) for x in stocks_param.replace('[', '').replace(']','').split(',')]
     stocks_formated = np.reshape(stocks_to_train, (int(len(stocks_to_train)/n_features), n_features))

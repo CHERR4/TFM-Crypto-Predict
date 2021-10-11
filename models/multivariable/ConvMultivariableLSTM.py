@@ -22,6 +22,8 @@ class ConvLSTM:
       self.n_outputs = n_outputs
       self.scaler = MinMaxScaler(feature_range=(0, 1))
       self.n_seq = n_seq
+      self.loss = loss
+      self.optimizer = optimizer
       print(self.model.summary())
     else:
       print('Empty model remember to import an existing model')
@@ -132,4 +134,4 @@ class ConvLSTM:
     self.loss = params['loss']
     self.optimizer = params['optimizer']
     self.scaler = load(open(scaler_path, 'rb'))
-
+    self.n_seq = params['n_seq']

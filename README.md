@@ -22,6 +22,12 @@ Este repositorio tiene la siguiente estructura:
     - `data/actualUnivariable/btcActualStocks.csv`
     - `data/actualUnivariable/ethActualStocks.csv`
     - `data/actualUnivariable/adaActualStocks.csv`
+  - `TFM_Trends_Preparation.csv`
+  - entrada:
+    - `bitcoinWeekSearches.csv`
+    - `bitcoinWeekNewsSearches.csv`
+  - salida:
+    - `stocksSearches.csv`
     
     
   2. **Búsqueda hiperparámetros**<br />
@@ -41,9 +47,17 @@ Este repositorio tiene la siguiente estructura:
         - data/multivariable/stocks.csv
         - models/univariable/*.py
 
+
   4. **Pruebas datos futuros**<br />
+    1. **Univariable**
     - `TFM_New_Dates_Predictions.ipynb`<br />
     - Ficheros de entrada para su ejecución:
         - data/univariable/*.csv
         - data/actualUnivariable/*.csv
         - models/univariable/*.py
+    2. **Multivariable**
+    - `TFM_New_Dates_Predictions_Multivariable.ipynb`<br/>
+    - Ficheros de entrada para su ejecución:
+        - data/multivariable/*.csv
+        - models/multivariable/*.csv
+

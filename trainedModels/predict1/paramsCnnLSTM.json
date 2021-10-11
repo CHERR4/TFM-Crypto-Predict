@@ -1,0 +1,10 @@
+{
+    "model": "CnnLSTM",
+    "n_neurons": 40,
+    "n_steps": 7,
+    "n_features": 3,
+    "n_outputs": 1,
+    "loss": "mean_squared_error",
+    "optimizer": "adam",
+    "n_seq": 1
+}
